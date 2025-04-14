@@ -52,8 +52,9 @@ def webhook():
 		bot.process_new_updates([update])
 		return 'ok', 200
 
-@app.route("/", methods=["GET"])
+@app.route("/", methods=["HEAD", "GET"])
 def home():
+	print(f"Запит від: {request.headers.get('User-Agent')}")
 	return "Сервер працює!"	
 	
 	
