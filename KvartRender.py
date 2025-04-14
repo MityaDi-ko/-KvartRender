@@ -52,7 +52,9 @@ def webhook():
 		bot.process_new_updates([update])
 		return 'ok', 200
 
-	
+@app.route("/", methods=["GET"])
+def home():
+	return "Сервер працює!"	
 	
 	
 def go_kvar(*args):
