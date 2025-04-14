@@ -60,6 +60,7 @@ def home():
 	
 def go_kvar(*args):
 	while True:
+		print("Функція go_kvar виконується...")
 		time_now = datetime.now()
 		#print("time_now =", time_now)
 		time_string = time_now.strftime("%H:%M:%S") #dt_string = time_now.strftime("%d/%m/%Y %H:%M:%S")
@@ -315,6 +316,7 @@ def go_kvar(*args):
 
 
 def go_dom(*args):
+	print("Функція go_kvar виконується...")
 	while True:
 		time_now = datetime.now()
 		#print("time_now =", time_now)
