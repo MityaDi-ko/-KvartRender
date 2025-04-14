@@ -1,5 +1,4 @@
 # -*- coding: utf8 -*-
-import psycopg2
 import os
 import requests
 from bs4 import BeautifulSoup as bs
@@ -78,23 +77,35 @@ def go_kvar(*args):
 
 				base_url_telegram = 'https://api.telegram.org/bot'+telegram_token+'/sendMessage'
 
-				# Завантажуємо URL бази даних із змінних середовища
-				DATABASE_URL = os.getenv("DATABASE_URL")  
-				# Підключення до Heroku Postgres
-				conn = psycopg2.connect(DATABASE_URL, sslmode='require')  
+				# Генеруємо ім'я файлу з часом і датою
+				#current_time = datetime.now().strftime("%d-%m-%Y_%H-%M")  # Формат: Рік-місяць-день_година-хвилина
+				# Шлях до теки, де будуть зберігатися файли баз даних
+				db_directory = "ad_db"
+				# Перевіряємо, чи існує тека. Якщо ні — створюємо її.
+				if not os.path.exists(db_directory):
+					os.makedirs(db_directory)
+					print(f"Тека '{db_directory}' створена")
+				# Формуємо шлях до файла бази даних всередині теки
+				file_path = os.path.join(db_directory, f"ads_kkk.db")
+				
+				# Підключення до бази даних або створення нової
+				conn = sqlite3.connect(file_path, check_same_thread=False)
 				cursor = conn.cursor()
+				
 				# Перевірка чи є таблиця ads_kvar
 				def ensure_table_exists(cursor):
 					# Таблиця ads_kvar
+					# Створення таблиці ads, якщо вона не існує
 					cursor.execute("""
-						CREATE TABLE IF NOT EXISTS ads_kvar (
-							id_ads SERIAL PRIMARY KEY,
+						CREATE TABLE IF NOT EXISTS ads (
+							id_ads INTEGER PRIMARY KEY,
 							url TEXT NOT NULL,
 							title TEXT NOT NULL,
 							price TEXT,
 							date TEXT
 						)
 					""")
+					conn.commit()
 					# logging.info("Таблиця 'ads_kvar' перевірена або створена.")
 				# Перевірка та створення таблиці
 				ensure_table_exists(cursor)
@@ -239,7 +250,7 @@ def go_kvar(*args):
 				
 					if int(id_ads) > 711800000:
 						# Вставлення даних
-						cursor.execute("INSERT INTO ads (id_ads, url, title, price, date) VALUES (%s, %s, %s, %s, %s)", (id_ads, url, title, price, date))
+						cursor.execute("INSERT INTO ads (id_ads, url, title, price, date) VALUES (?, ?, ?, ?, ?)", (id_ads, url, title, price, date))
 						conn.commit()
 						print("Добавлено в БД")
 					else:
@@ -256,13 +267,9 @@ def go_kvar(*args):
 								# Отправка в телеграм
 								send_telegram(ad['title'], ad['price'], ad['url'], ad['date'], ad['id_ads'])
 								print("БД дополненна")
-							else: 
-								print("есть в БД")
-						
 
 				def check_item_db(id_ads):
-					# Отримання даних
-					sql = 'SELECT * FROM ads WHERE id_ads=%s'
+					sql = 'SELECT * FROM ads WHERE id_ads=?'
 					try:
 						cursor.execute(sql, [(int(id_ads))])
 						print("Получено")
@@ -271,6 +278,13 @@ def go_kvar(*args):
 						logging.error(f"Помилка у запиті до БД: {e}")
 						return None
 
+				# Функція для надсилання повідомлення з файлом db
+				def send_db_file(telegram_chat_id, file_path):
+					with open(file_path, 'rb') as db_file:
+						bot.send_document(telegram_chat_id, db_file)
+						print(f"Файл {file_path} успішно надіслано в Telegram!")
+						
+				# Функція для надсилання повідомлення з данними
 				def send_telegram(title, url, price, date, id_ads):
 					params = {	'chat_id': telegram_chat_id,
 								'text': title+'\n'+url+'\n'+price+'\n'+date+'\n'+id_ads,	
@@ -287,6 +301,8 @@ def go_kvar(*args):
 
 				ads = olx_parse(base_url, headers)
 				process_send(ads)
+				send_db_file(telegram_chat_id, file_path)
+				
 				print ('Все хорощо я закончил')
 				time.sleep(7200) #7200 sec
 				print("time =", t)
@@ -317,23 +333,37 @@ def go_dom(*args):
 
 				base_url_telegram = 'https://api.telegram.org/bot'+telegram_token+'/sendMessage'
 
-				# Завантажуємо URL бази даних із змінних середовища
-				DATABASE_URL = os.getenv("DATABASE_URL")  
-				# Підключення до Heroku Postgres
-				conn = psycopg2.connect(DATABASE_URL, sslmode='require')  
+				# Генеруємо ім'я файлу з часом і датою
+				#current_time = datetime.now().strftime("%d-%m-%Y_%H-%M")  # Формат: Рік-місяць-день_година-хвилина
+				# Шлях до теки, де будуть зберігатися файли баз даних
+				db_directory = "ad_db"
+				# Перевіряємо, чи існує тека. Якщо ні — створюємо її.
+				if not os.path.exists(db_directory):
+					os.makedirs(db_directory)
+					print(f"Тека '{db_directory}' створена")
+				# Формуємо шлях до файла бази даних всередині теки
+				file_path = os.path.join(db_directory, f"ads_dom.db")
+				
+				# Підключення до бази даних або створення нової
+				conn = sqlite3.connect(file_path, check_same_thread=False)
 				cursor = conn.cursor()
+				
+				# Перевірка чи є таблиця ads_kvar
 				def ensure_table_exists(cursor):
-					# Таблиця ads_dom
+					# Таблиця ads_kvar
+					# Створення таблиці ads, якщо вона не існує
 					cursor.execute("""
-						CREATE TABLE IF NOT EXISTS ads_dom (
-							id_ads SERIAL PRIMARY KEY,
+						CREATE TABLE IF NOT EXISTS ads (
+							id_ads INTEGER PRIMARY KEY,
 							url TEXT NOT NULL,
 							title TEXT NOT NULL,
 							price TEXT,
 							date TEXT
 						)
 					""")
-					logging.info("Таблиця 'ads_dom' перевірена або створена.")
+					conn.commit()
+					# logging.info("Таблиця 'ads_kvar' перевірена або створена.")
+				# Перевірка та створення таблиці
 				ensure_table_exists(cursor)
 
 				def olx_parse(base_url, headers):
@@ -475,7 +505,7 @@ def go_dom(*args):
 				def send_to_db(id_ads, url, title, price, date):
 					if int(id_ads) > 711800000:
 						# Вставлення даних
-						cursor.execute("INSERT INTO ads (id_ads, url, title, price, date) VALUES (%s, %s, %s, %s, %s)", (id_ads, url, title, price, date))
+						cursor.execute("INSERT INTO ads (id_ads, url, title, price, date) VALUES (?, ?, ?, ?, ?)", (id_ads, url, title, price, date))
 						conn.commit()
 						print("Добавлено в БД")
 					else:
@@ -483,24 +513,31 @@ def go_dom(*args):
 
 
 				def process_send(ads):
-					for ad in ads:
-						elem_exists = check_item_db(ad['id_ads'])
-						# проверяем есть ли данный элемент в БД
-						if not elem_exists and int(ad['id_ads'])>712000000:
-							# Отправка в БД
-							send_to_db(ad['id_ads'], ad['url'], ad['title'], ad['price'], ad['date'])
-							# Отправка в телеграм
-							send_telegram(ad['title'], ad['price'], ad['url'], ad['date'], ad['id_ads'])
+					for ad in ads:							
+							elem_exists = check_item_db(ad['id_ads'])
+							# проверяем есть ли данный элемент в БД
+							if not elem_exists and int(ad['id_ads'])>850000000:
+								# Отправка в БД
+								send_to_db(ad['id_ads'], ad['url'], ad['title'], ad['price'], ad['date'])
+								# Отправка в телеграм
+								send_telegram(ad['title'], ad['price'], ad['url'], ad['date'], ad['id_ads'])
 							print("БД дополненна")
-						else: 
-							print("есть в БД")
 
 				def check_item_db(id_ads):
-					# Отримання даних
-					sql = 'SELECT * FROM ads WHERE id_ads=%s'
-					cursor.execute(sql, [(int(id_ads))])
-					print("Получено")
-					return cursor.fetchone()
+					sql = 'SELECT * FROM ads WHERE id_ads=?'
+					try:
+						cursor.execute(sql, [(int(id_ads))])
+						print("Получено")
+						return cursor.fetchone()  # Повертає результат запиту
+					except sqlite3.OperationalError as e:
+						logging.error(f"Помилка у запиті до БД: {e}")
+						return None
+						
+				# Функція для надсилання повідомлення з файлом db
+				def send_db_file(telegram_chat_id, file_path):
+					with open(file_path, 'rb') as db_file:
+						bot.send_document(telegram_chat_id, db_file)
+						print(f"Файл {file_path} успішно надіслано в Telegram!")
 
 				def send_telegram(title, url, price, date, id_ads):
 					params = {	'chat_id': telegram_chat_id,
@@ -518,6 +555,8 @@ def go_dom(*args):
 
 				ads = olx_parse(base_url, headers)
 				process_send(ads)
+				send_db_file(telegram_chat_id, file_path)
+				
 				print ('Все хорощо я закончил')
 				time.sleep(7200) #7200 sec
 				print("time =", t)
