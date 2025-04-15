@@ -1,0 +1,22 @@
+# Exported from Render on 2025-04-15T05:40:26Z
+services:
+- type: web
+  name: KvartRender
+  runtime: python
+  repo: https://github.com/MityaDi-ko/-KvartRender
+  plan: free
+  envVars:
+  - key: URL_NG
+    sync: false
+  - key: chat_id.DOM
+    sync: false
+  - key: chat_id.KVAR
+    sync: false
+  - key: SECRET
+    sync: false
+  - key: TELEGRAM_TOKEN
+    sync: false
+  region: frankfurt
+  buildCommand: pip install -r requirements.txt
+  startCommand: gunicorn KvartRender:app
+version: "1"
