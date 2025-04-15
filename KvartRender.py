@@ -22,8 +22,7 @@ from time import sleep
 
 import threading
 
-# За замовченням WARNING а тепер INFO WARNING ERROR DEBUG
-app.logger.setLevel(logging.INFO)
+
 
 # Укажите токен телеграм
 telegram_token = os.getenv("TELEGRAM_TOKEN")
@@ -32,8 +31,10 @@ secret = os.getenv("SECRET")
 url_ng = os.getenv("URL_NG")
 
 
-
 app = Flask(__name__)
+
+# За замовченням WARNING а тепер INFO WARNING ERROR DEBUG
+app.logger.setLevel(logging.INFO)
 
 @app.route('/', methods=['POST'])
 def webhook():
