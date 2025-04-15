@@ -134,7 +134,7 @@ def go_kvar(*args):
 									match = re.search(r'page=(\d+)', last_page_href)
 									if match:
 										number_of_last_page = int(match.group(1))
-										app.logger.info("f"Номер останньої сторінки визначено OLX.kvar: {number_of_last_page}")
+										app.logger.info(f"Номер останньої сторінки визначено OLX.kvar: {number_of_last_page}")
 										# Ітерація по всіх сторінках
 										for i in range(1, number_of_last_page + 1):
 											try:
@@ -145,11 +145,11 @@ def go_kvar(*args):
 													continue
 												# Формування нового URL з параметром page={i} після currency=USD
 												url = f"{base_url_parts[0]}currency=USD&page={i}{base_url_parts[1]}"
-												#app.logger.info("f"Згенеровано URL OLX.kvar:")
+												#app.logger.info(f"Згенеровано URL OLX.kvar:")
 												# Перевірка URL перед додаванням
 												if url not in urls:
 													urls.append(url)
-													#app.logger.info("f"URL успішно додано до списку OLX.kvar:")
+													#app.logger.info(f"URL успішно додано до списку OLX.kvar:")
 												else:
 													app.logger.warning(f"URL вже є у списку OLX.kvar:")
 											except Exception as e:
@@ -158,17 +158,17 @@ def go_kvar(*args):
 										logging.error("Неможливо знайти номер останньої сторінки OLX.kvar")
 
 							except:
-								app.logger.info("f"Ітерація по сторінках не здійснена: OLX.kvar {num}")
+								app.logger.info(f"Ітерація по сторінках не здійснена: OLX.kvar {num}")
 								pass
 
 							#итерация по всем страницам
 							for url in urls:
 								try:
-									#app.logger.info("f"Початок обробки URL OLX.kvar:")
+									#app.logger.info(f"Початок обробки URL OLX.kvar:")
 									request = session.get(url, headers=headers)
 									soup = bs(request.content, 'lxml')
 									trs = soup.find_all('div', attrs={'class': 'css-l9drzq'}) 
-									#app.logger.info("f"Знайдено {len(trs)} оголошень на сторінці URL OLX.kvar")
+									#app.logger.info(f"Знайдено {len(trs)} оголошень на сторінці URL OLX.kvar")
 									#поиск всех классов с объявлениями
 									# Ітерація по кожному оголошенню
 									for tr in trs:
@@ -180,20 +180,20 @@ def go_kvar(*args):
 												app.logger.info("Знайдено об'яву за сьогодні OLX.kvar")
 												#Заголовок
 												title = tr.find('h4', attrs={'class': 'css-1g61gc2'}).text
-												app.logger.info("f"{title}")
+												app.logger.info(f"{title}")
 												#Посилання
 												href_a = tr.find('a', attrs={'class': 'css-1tqlkj0'})['href']
 												href = "https://www.olx.ua" + href_a
-												app.logger.info("f"{href}")
+												app.logger.info(f"{href}")
 												#Ціна
 												price = tr.find('p', attrs={'class': 'css-uj7mm0'}).text
-												app.logger.info("f"{price}")
+												app.logger.info(f"{price}")
 												#Номер ID
 												# Відкриваємо детальну сторінку оголошення через знайдене посилання
 												try:
 													detail_response = session.get(href, headers=headers)
 													# Логуємо статус відповіді
-													app.logger.info("f"Відповідь сервера для {href}: {detail_response.status_code}")
+													app.logger.info(f"Відповідь сервера для {href}: {detail_response.status_code}")
 													# Перевірка, чи запит пройшов успішно
 													if detail_response.status_code == 200:
 														detail_soup = bs(detail_response.content, 'lxml')
@@ -201,12 +201,12 @@ def go_kvar(*args):
 														detail_ID_element = detail_soup.find('span', attrs={'class': 'css-w85dhy'})
 														if detail_ID_element:
 															detail_ID = detail_ID_element.text
-															app.logger.info("f"Знайдено {detail_ID} ID OLX.kvar.AD")
+															app.logger.info(f"Знайдено {detail_ID} ID OLX.kvar.AD")
 															# Витягуємо ID за допомогою регулярного виразу
 															re_ID = re.search(r'\d+', detail_ID)
 															if re_ID:
 																dataID = re_ID.group()
-																app.logger.info("f"ID оголошення: {dataID}")
+																app.logger.info(f"ID оголошення: {dataID}")
 															else:
 																app.logger.warning(f"Числове значення ID не знайдено на сторінці OLX.kvar.AD.")
 														else:
@@ -223,7 +223,7 @@ def go_kvar(*args):
 														'id_ads': dataID,
 														'date': dateRecord.strip()
 													})
-													app.logger.info("f"Додано оголошення OLX.kvar: {ads}")
+													app.logger.info(f"Додано оголошення OLX.kvar: {ads}")
 												else:
 													app.logger.warning(f"Не вдалося додати оголошення без ID: {title}")
 											else:
