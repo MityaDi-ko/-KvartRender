@@ -22,7 +22,14 @@ from time import sleep
 
 import threading
 
-
+# Конфігурація логів
+logging.basicConfig(
+    level=logging.DEBUG,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    handlers=[
+        logging.StreamHandler()
+    ]
+)
 
 # Укажите токен телеграм
 telegram_token = os.getenv("TELEGRAM_TOKEN")
@@ -35,6 +42,7 @@ app = Flask(__name__)
 
 # За замовченням WARNING а тепер INFO WARNING ERROR DEBUG
 app.logger.setLevel(logging.INFO)
+app.logger.addHandler(handler)
 
 @app.route('/', methods=['POST'])
 def webhook():
