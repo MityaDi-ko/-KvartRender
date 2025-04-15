@@ -22,17 +22,8 @@ from time import sleep
 
 import threading
 
-# Спочатку встановлюємо рівень логування для urllib3
-urllib3_log.setLevel(logging.WARNING)  # Відображати тільки попередження або помилки
-# Функція для логування
-logging.basicConfig(
-    level=logging.DEBUG,  # Рівень логування
-    format='%(asctime)s - %(levelname)s - %(message)s',  # Формат повідомлень
-    handlers=[
-        logging.FileHandler("app.log"),  # Логи у файл
-        logging.StreamHandler()  # Виведення в консоль
-    ]
-)
+# За замовченням WARNING а тепер INFO WARNING ERROR DEBUG
+app.logger.setLevel(logging.INFO)
 
 # Укажите токен телеграм
 telegram_token = os.getenv("TELEGRAM_TOKEN")
@@ -48,24 +39,24 @@ app = Flask(__name__)
 def webhook():
 		read = request.stream.read().decode('utf-8')
 		update = telebot.types.Update.de_json(read)
-		#print(update)
+		#app.logger.info(update)
 		bot.process_new_updates([update])
 		return 'ok', 200
 
 @app.route("/", methods=["HEAD", "GET"])
 def home():
-	print(f"Запит від: {request.headers.get('User-Agent')}")
+	app.logger.info(f"Запит від: {request.headers.get('User-Agent')}")
 	return "Сервер працює!"	
 	
 	
 def go_kvar(*args):
 	try:
-		print("Функція go_kvar  виконується...")
+		app.logger.info("Функція go_kvar  виконується...")
 		while True:
 			time_now = datetime.now()
-			#print("time_now =", time_now)
+			#app.logger.info("time_now =", time_now)
 			time_string = time_now.strftime("%H:%M:%S") #dt_string = time_now.strftime("%d/%m/%Y %H:%M:%S")
-			#print("time =", time_string)
+			#app.logger.info("time =", time_string)
 			t = tuple(int(i) for i in time_string.split(':'))
 
 			if 8 < t[0] < 20:
@@ -89,7 +80,7 @@ def go_kvar(*args):
 					# Перевіряємо, чи існує тека. Якщо ні — створюємо її.
 					if not os.path.exists(db_directory):
 						os.makedirs(db_directory)
-						print(f"Тека '{db_directory}' створена")
+						app.logger.info(f"Тека '{db_directory}' створена")
 					# Формуємо шлях до файла бази даних всередині теки
 					file_path = os.path.join(db_directory, f"ads_kkk.db")
 					
@@ -111,12 +102,12 @@ def go_kvar(*args):
 							)
 						""")
 						conn.commit()
-						# logging.info("Таблиця 'ads_kvar' перевірена або створена.")
+						# app.logger.info("Таблиця 'ads_kvar' перевірена або створена.")
 					# Перевірка та створення таблиці
 					ensure_table_exists(cursor)
 
 					def olx_parse(base_url, headers):
-						logging.info("Розпочався парсинг сайту OLX.kvar")
+						app.logger.info("Розпочався парсинг сайту OLX.kvar")
 						global start
 						start = datetime.now()
 						urls = []
@@ -127,7 +118,7 @@ def go_kvar(*args):
 						request = session.get(base_url, headers=headers)
 						#проверка ответа от сервера
 						if request.status_code == 200:
-							logging.info("Успішне з'єднання з сайтом: OLX.kvar")
+							app.logger.info("Успішне з'єднання з сайтом: OLX.kvar")
 							soup = bs(request.content, "lxml")
 							try:
 								#определение последней страницы
@@ -143,41 +134,41 @@ def go_kvar(*args):
 									match = re.search(r'page=(\d+)', last_page_href)
 									if match:
 										number_of_last_page = int(match.group(1))
-										logging.info(f"Номер останньої сторінки визначено OLX.kvar: {number_of_last_page}")
+										app.logger.info("f"Номер останньої сторінки визначено OLX.kvar: {number_of_last_page}")
 										# Ітерація по всіх сторінках
 										for i in range(1, number_of_last_page + 1):
 											try:
 												# Розділення base_url на дві частини по USD
 												base_url_parts = base_url.split('currency=USD')
 												if len(base_url_parts) < 2:
-													logging.error(f"Помилка OLX.kvar: базовий URL не містить параметра currency=USD. Base URL: {base_url}")
+													app.logger.error(f"Помилка OLX.kvar: базовий URL не містить параметра currency=USD. Base URL: {base_url}")
 													continue
 												# Формування нового URL з параметром page={i} після currency=USD
 												url = f"{base_url_parts[0]}currency=USD&page={i}{base_url_parts[1]}"
-												#logging.info(f"Згенеровано URL OLX.kvar:")
+												#app.logger.info("f"Згенеровано URL OLX.kvar:")
 												# Перевірка URL перед додаванням
 												if url not in urls:
 													urls.append(url)
-													#logging.info(f"URL успішно додано до списку OLX.kvar:")
+													#app.logger.info("f"URL успішно додано до списку OLX.kvar:")
 												else:
-													logging.warning(f"URL вже є у списку OLX.kvar:")
+													app.logger.warning(f"URL вже є у списку OLX.kvar:")
 											except Exception as e:
-												logging.error(f"Сталася помилка під час обробки сторінки OLX.kvar {i}: {e}")
+												app.logger.error(f"Сталася помилка під час обробки сторінки OLX.kvar {i}: {e}")
 									else:
 										logging.error("Неможливо знайти номер останньої сторінки OLX.kvar")
 
 							except:
-								logging.info(f"Ітерація по сторінках не здійснена: OLX.kvar {num}")
+								app.logger.info("f"Ітерація по сторінках не здійснена: OLX.kvar {num}")
 								pass
 
 							#итерация по всем страницам
 							for url in urls:
 								try:
-									#logging.info(f"Початок обробки URL OLX.kvar:")
+									#app.logger.info("f"Початок обробки URL OLX.kvar:")
 									request = session.get(url, headers=headers)
 									soup = bs(request.content, 'lxml')
 									trs = soup.find_all('div', attrs={'class': 'css-l9drzq'}) 
-									#logging.info(f"Знайдено {len(trs)} оголошень на сторінці URL OLX.kvar")
+									#app.logger.info("f"Знайдено {len(trs)} оголошень на сторінці URL OLX.kvar")
 									#поиск всех классов с объявлениями
 									# Ітерація по кожному оголошенню
 									for tr in trs:
@@ -186,23 +177,23 @@ def go_kvar(*args):
 											dateRecord = tr.find('p', attrs={'class': 'css-vbz67q'}).text
 											# забираем только сегодняшние обьявления
 											if 'Сьогодні' in dateRecord:
-												logging.info("Знайдено об'яву за сьогодні OLX.kvar")
+												app.logger.info("Знайдено об'яву за сьогодні OLX.kvar")
 												#Заголовок
 												title = tr.find('h4', attrs={'class': 'css-1g61gc2'}).text
-												logging.info(f"{title}")
+												app.logger.info("f"{title}")
 												#Посилання
 												href_a = tr.find('a', attrs={'class': 'css-1tqlkj0'})['href']
 												href = "https://www.olx.ua" + href_a
-												logging.info(f"{href}")
+												app.logger.info("f"{href}")
 												#Ціна
 												price = tr.find('p', attrs={'class': 'css-uj7mm0'}).text
-												logging.info(f"{price}")
+												app.logger.info("f"{price}")
 												#Номер ID
 												# Відкриваємо детальну сторінку оголошення через знайдене посилання
 												try:
 													detail_response = session.get(href, headers=headers)
 													# Логуємо статус відповіді
-													logging.info(f"Відповідь сервера для {href}: {detail_response.status_code}")
+													app.logger.info("f"Відповідь сервера для {href}: {detail_response.status_code}")
 													# Перевірка, чи запит пройшов успішно
 													if detail_response.status_code == 200:
 														detail_soup = bs(detail_response.content, 'lxml')
@@ -210,20 +201,20 @@ def go_kvar(*args):
 														detail_ID_element = detail_soup.find('span', attrs={'class': 'css-w85dhy'})
 														if detail_ID_element:
 															detail_ID = detail_ID_element.text
-															logging.info(f"Знайдено {detail_ID} ID OLX.kvar.AD")
+															app.logger.info("f"Знайдено {detail_ID} ID OLX.kvar.AD")
 															# Витягуємо ID за допомогою регулярного виразу
 															re_ID = re.search(r'\d+', detail_ID)
 															if re_ID:
 																dataID = re_ID.group()
-																logging.info(f"ID оголошення: {dataID}")
+																app.logger.info("f"ID оголошення: {dataID}")
 															else:
-																logging.warning(f"Числове значення ID не знайдено на сторінці OLX.kvar.AD.")
+																app.logger.warning(f"Числове значення ID не знайдено на сторінці OLX.kvar.AD.")
 														else:
-															logging.warning(f"Елемент з класом 'css-w85dhy' не знайдено на сторінці {href}.")
+															app.logger.warning(f"Елемент з класом 'css-w85dhy' не знайдено на сторінці {href}.")
 													else:
-														logging.error(f"Помилка доступу до сторінки OLX.kvar.AD. Статус сервера: {detail_response.status_code}")
+														app.logger.error(f"Помилка доступу до сторінки OLX.kvar.AD. Статус сервера: {detail_response.status_code}")
 												except Exception as e:
-													logging.error(f"Помилка при обробці сторінки OLX.kvar.AD: {e}")
+													app.logger.error(f"Помилка при обробці сторінки OLX.kvar.AD: {e}")
 												if dataID:  # Перевіряємо, чи значення ID не пусте
 													ads.append({
 														'title': title,
@@ -232,22 +223,22 @@ def go_kvar(*args):
 														'id_ads': dataID,
 														'date': dateRecord.strip()
 													})
-													logging.info(f"Додано оголошення OLX.kvar: {ads}")
+													app.logger.info("f"Додано оголошення OLX.kvar: {ads}")
 												else:
-													logging.warning(f"Не вдалося додати оголошення без ID: {title}")
+													app.logger.warning(f"Не вдалося додати оголошення без ID: {title}")
 											else:
-												#logging.info("Не знайдено об'яв за сьогодні OLX.kvar")
+												#app.logger.info("Не знайдено об'яв за сьогодні OLX.kvar")
 												print
 										except Exception as e:
-											logging.error(f"Помилка при ітерації оголошення на сторінці OLX.kvar: {e}")
+											app.logger.error(f"Помилка при ітерації оголошення на сторінці OLX.kvar: {e}")
 
 								except Exception as e:
-										logging.error(f"Помилка при обробці URL OLX.kvar {url}: {e}")
+										app.logger.error(f"Помилка при обробці URL OLX.kvar {url}: {e}")
 						else:
-							logging.warning(f"Помилка підключення OLX.kvar, статус-код: {request.status_code}")
-							print('Error')
+							app.logger.warning(f"Помилка підключення OLX.kvar, статус-код: {request.status_code}")
+							app.logger.info('Error')
 						end = datetime.now()
-						print(f"Time: {end-start}")
+						app.logger.info(f"Time: {end-start}")
 						return ads
 
 
@@ -257,9 +248,9 @@ def go_kvar(*args):
 							# Вставлення даних
 							cursor.execute("INSERT INTO ads (id_ads, url, title, price, date) VALUES (?, ?, ?, ?, ?)", (id_ads, url, title, price, date))
 							conn.commit()
-							print("Добавлено в БД")
+							app.logger.info("Добавлено в БД")
 						else:
-							print("Очень старое")
+							app.logger.info("Очень старое")
 
 
 					def process_send(ads):
@@ -271,23 +262,23 @@ def go_kvar(*args):
 									send_to_db(ad['id_ads'], ad['url'], ad['title'], ad['price'], ad['date'])
 									# Отправка в телеграм
 									send_telegram(ad['title'], ad['price'], ad['url'], ad['date'], ad['id_ads'])
-									print("БД дополненна")
+									app.logger.info("БД дополненна")
 
 					def check_item_db(id_ads):
 						sql = 'SELECT * FROM ads WHERE id_ads=?'
 						try:
 							cursor.execute(sql, [(int(id_ads))])
-							print("Получено")
+							app.logger.info("Получено")
 							return cursor.fetchone()  # Повертає результат запиту
 						except sqlite3.OperationalError as e:
-							logging.error(f"Помилка у запиті до БД: {e}")
+							app.logger.error(f"Помилка у запиті до БД: {e}")
 							return None
 
 					# Функція для надсилання повідомлення з файлом db
 					def send_db_file(telegram_chat_id, file_path):
 						with open(file_path, 'rb') as db_file:
 							bot.send_document(telegram_chat_id, db_file)
-							print(f"Файл {file_path} успішно надіслано в Telegram!")
+							app.logger.info(f"Файл {file_path} успішно надіслано в Telegram!")
 							
 					# Функція для надсилання повідомлення з данними
 					def send_telegram(title, url, price, date, id_ads):
@@ -302,29 +293,29 @@ def go_kvar(*args):
 						}
 						session = requests.Session()
 						response = session.get(base_url_telegram, params=params)
-						print ("Ok")
+						app.logger.info("Ok")
 
 					ads = olx_parse(base_url, headers)
 					process_send(ads)
 					send_db_file(telegram_chat_id, file_path)
 					
-					print ('Все хорощо я закончил')
+					app.logger.info('Все хорощо я закончил')
 					time.sleep(7200) #7200 sec
-					print("time =", t)
+					app.logger.info("time =", t)
 			else:
-				print('sleep 46800 sec')
+				app.logger.info('sleep 46800 sec')
 				time.sleep(46800)
 	except Exception as e:
-		print(f"Помилка у go_kvar: {e}")
+		app.logger.info(f"Помилка у go_kvar: {e}")
 
 def go_dom(*args):
 	try:
-		print("Функція go_dom виконується...")
+		app.logger.info("Функція go_dom виконується...")
 		while True:
 			time_now = datetime.now()
-			#print("time_now =", time_now)
+			#app.logger.info("time_now =", time_now)
 			time_string = time_now.strftime("%H:%M:%S") #dt_string = time_now.strftime("%d/%m/%Y %H:%M:%S")
-			#print("time =", time_string)
+			#app.logger.info("time =", time_string)
 			t = tuple(int(i) for i in time_string.split(':'))
 
 			if 8 < t[0] < 20:
@@ -348,7 +339,7 @@ def go_dom(*args):
 					# Перевіряємо, чи існує тека. Якщо ні — створюємо її.
 					if not os.path.exists(db_directory):
 						os.makedirs(db_directory)
-						print(f"Тека '{db_directory}' створена")
+						app.logger.info(f"Тека '{db_directory}' створена")
 					# Формуємо шлях до файла бази даних всередині теки
 					file_path = os.path.join(db_directory, f"ads_dom.db")
 					
@@ -370,12 +361,12 @@ def go_dom(*args):
 							)
 						""")
 						conn.commit()
-						# logging.info("Таблиця 'ads_kvar' перевірена або створена.")
+						# app.logger.info("Таблиця 'ads_kvar' перевірена або створена.")
 					# Перевірка та створення таблиці
 					ensure_table_exists(cursor)
 
 					def olx_parse(base_url, headers):
-						logging.info("Розпочався парсинг сайту OLX.dom")
+						app.logger.info("Розпочався парсинг сайту OLX.dom")
 						global start
 						start = datetime.now()
 						urls = []
@@ -386,7 +377,7 @@ def go_dom(*args):
 						request = session.get(base_url, headers=headers)
 						#проверка ответа от сервера
 						if request.status_code == 200:
-							logging.info("Успішне з'єднання з сайтом: OLX.dom")
+							app.logger.info("Успішне з'єднання з сайтом: OLX.dom")
 							soup = bs(request.content, "lxml")
 							try:
 								#определение последней страницы
@@ -402,41 +393,41 @@ def go_dom(*args):
 									match = re.search(r'page=(\d+)', last_page_href)
 									if match:
 										number_of_last_page = int(match.group(1))
-										logging.info(f"Номер останньої сторінки визначено OLX.dom: {number_of_last_page}")
+										app.logger.info(f"Номер останньої сторінки визначено OLX.dom: {number_of_last_page}")
 										# Ітерація по всіх сторінках
 										for i in range(1, number_of_last_page + 1):
 											try:
 												# Розділення base_url на дві частини по USD
 												base_url_parts = base_url.split('currency=USD')
 												if len(base_url_parts) < 2:
-													logging.error(f"Помилка OLX.dom: базовий URL не містить параметра currency=USD. Base URL: {base_url}")
+													app.logger.error(f"Помилка OLX.dom: базовий URL не містить параметра currency=USD. Base URL: {base_url}")
 													continue
 												# Формування нового URL з параметром page={i} після currency=USD
 												url = f"{base_url_parts[0]}currency=USD&page={i}{base_url_parts[1]}"
-												#logging.info(f"Згенеровано URL OLX.dom:")
+												#app.logger.info(f"Згенеровано URL OLX.dom:")
 												# Перевірка URL перед додаванням
 												if url not in urls:
 													urls.append(url)
-													#logging.info(f"URL успішно додано до списку OLX.dom:")
+													#app.logger.info(f"URL успішно додано до списку OLX.dom:")
 												else:
-													logging.warning(f"URL вже є у списку OLX.dom:")
+													app.logger.warning(f"URL вже є у списку OLX.dom:")
 											except Exception as e:
-												logging.error(f"Сталася помилка під час обробки сторінки OLX.dom {i}: {e}")
+												app.logger.error(f"Сталася помилка під час обробки сторінки OLX.dom {i}: {e}")
 									else:
 										logging.error("Неможливо знайти номер останньої сторінки OLX.dom")
 
 							except:
-								logging.info(f"Ітерація по сторінках не здійснена: OLX.dom {num}")
+								app.logger.info(f"Ітерація по сторінках не здійснена: OLX.dom {num}")
 								pass
 
 							#итерация по всем страницам
 							for url in urls:
 								try:
-									#logging.info(f"Початок обробки URL OLX.dom:")
+									#app.logger.info(f"Початок обробки URL OLX.dom:")
 									request = session.get(url, headers=headers)
 									soup = bs(request.content, 'lxml')
 									trs = soup.find_all('div', attrs={'class': 'css-l9drzq'}) 
-									#logging.info(f"Знайдено {len(trs)} оголошень на сторінці URL OLX.dom")
+									#app.logger.info(f"Знайдено {len(trs)} оголошень на сторінці URL OLX.dom")
 									#поиск всех классов с объявлениями
 									# Ітерація по кожному оголошенню
 									for tr in trs:
@@ -445,23 +436,23 @@ def go_dom(*args):
 											dateRecord = tr.find('p', attrs={'class': 'css-vbz67q'}).text
 											# забираем только сегодняшние обьявления
 											if 'Сьогодні' in dateRecord:
-												logging.info("Знайдено об'яву за сьогодні OLX.dom")
+												app.logger.info("Знайдено об'яву за сьогодні OLX.dom")
 												#Заголовок
 												title = tr.find('h4', attrs={'class': 'css-1g61gc2'}).text
-												logging.info(f"{title}")
+												app.logger.info(f"{title}")
 												#Посилання
 												href_a = tr.find('a', attrs={'class': 'css-1tqlkj0'})['href']
 												href = "https://www.olx.ua" + href_a
-												logging.info(f"{href}")
+												app.logger.info(f"{href}")
 												#Ціна
 												price = tr.find('p', attrs={'class': 'css-uj7mm0'}).text
-												logging.info(f"{price}")
+												app.logger.info(f"{price}")
 												#Номер ID
 												# Відкриваємо детальну сторінку оголошення через знайдене посилання
 												try:
 													detail_response = session.get(href, headers=headers)
 													# Логуємо статус відповіді
-													logging.info(f"Відповідь сервера для {href}: {detail_response.status_code}")
+													app.logger.info(f"Відповідь сервера для {href}: {detail_response.status_code}")
 													# Перевірка, чи запит пройшов успішно
 													if detail_response.status_code == 200:
 														detail_soup = bs(detail_response.content, 'lxml')
@@ -469,20 +460,20 @@ def go_dom(*args):
 														detail_ID_element = detail_soup.find('span', attrs={'class': 'css-w85dhy'})
 														if detail_ID_element:
 															detail_ID = detail_ID_element.text
-															logging.info(f"Знайдено {detail_ID} ID OLX.dom.AD")
+															app.logger.info(f"Знайдено {detail_ID} ID OLX.dom.AD")
 															# Витягуємо ID за допомогою регулярного виразу
 															re_ID = re.search(r'\d+', detail_ID)
 															if re_ID:
 																dataID = re_ID.group()
-																logging.info(f"ID оголошення: {dataID}")
+																app.logger.info(f"ID оголошення: {dataID}")
 															else:
-																logging.warning(f"Числове значення ID не знайдено на сторінці OLX.dom.AD.")
+																app.logger.warning(f"Числове значення ID не знайдено на сторінці OLX.dom.AD.")
 														else:
-															logging.warning(f"Елемент з класом 'css-w85dhy' не знайдено на сторінці {href}.")
+															app.logger.warning(f"Елемент з класом 'css-w85dhy' не знайдено на сторінці {href}.")
 													else:
-														logging.error(f"Помилка доступу до сторінки OLX.dom.AD. Статус сервера: {detail_response.status_code}")
+														app.logger.error(f"Помилка доступу до сторінки OLX.dom.AD. Статус сервера: {detail_response.status_code}")
 												except Exception as e:
-													logging.error(f"Помилка при обробці сторінки OLX.dom.AD: {e}")
+													app.logger.error(f"Помилка при обробці сторінки OLX.dom.AD: {e}")
 												if dataID:  # Перевіряємо, чи значення ID не пусте
 													ads.append({
 														'title': title,
@@ -491,22 +482,22 @@ def go_dom(*args):
 														'id_ads': dataID,
 														'date': dateRecord.strip()
 													})
-													logging.info(f"Додано оголошення OLX.kvar: {title} ({dataID})")
+													app.logger.info(f"Додано оголошення OLX.kvar: {title} ({dataID})")
 												else:
-													logging.warning(f"Не вдалося додати оголошення без ID: {title}")
+													app.logger.warning(f"Не вдалося додати оголошення без ID: {title}")
 											else:
 												print
-												#logging.info("Не знайдено об'яв за сьогодні OLX.dom")
+												#app.logger.info("Не знайдено об'яв за сьогодні OLX.dom")
 										except Exception as e:
-											logging.error(f"Помилка при ітерації оголошення на сторінці OLX.dom: {e}")
+											app.logger.error(f"Помилка при ітерації оголошення на сторінці OLX.dom: {e}")
 
 								except Exception as e:
-										logging.error(f"Помилка при обробці URL OLX.dom {url}: {e}")
+										app.logger.error(f"Помилка при обробці URL OLX.dom {url}: {e}")
 						else:
-							logging.warning(f"Помилка підключення OLX.dom, статус-код: {request.status_code}")
-							print('Error')
+							app.logger.warning(f"Помилка підключення OLX.dom, статус-код: {request.status_code}")
+							app.logger.info('Error')
 						end = datetime.now()
-						print(f"Time: {end-start}")
+						app.logger.info(f"Time: {end-start}")
 						return ads
 
 
@@ -515,9 +506,9 @@ def go_dom(*args):
 							# Вставлення даних
 							cursor.execute("INSERT INTO ads (id_ads, url, title, price, date) VALUES (?, ?, ?, ?, ?)", (id_ads, url, title, price, date))
 							conn.commit()
-							print("Добавлено в БД")
+							app.logger.info("Добавлено в БД")
 						else:
-							print("Очень старое")
+							app.logger.info("Очень старое")
 
 
 					def process_send(ads):
@@ -529,23 +520,23 @@ def go_dom(*args):
 									send_to_db(ad['id_ads'], ad['url'], ad['title'], ad['price'], ad['date'])
 									# Отправка в телеграм
 									send_telegram(ad['title'], ad['price'], ad['url'], ad['date'], ad['id_ads'])
-								print("БД дополненна")
+								app.logger.info("БД дополненна")
 
 					def check_item_db(id_ads):
 						sql = 'SELECT * FROM ads WHERE id_ads=?'
 						try:
 							cursor.execute(sql, [(int(id_ads))])
-							print("Получено")
+							app.logger.info("Получено")
 							return cursor.fetchone()  # Повертає результат запиту
 						except sqlite3.OperationalError as e:
-							logging.error(f"Помилка у запиті до БД: {e}")
+							app.logger.error(f"Помилка у запиті до БД: {e}")
 							return None
 							
 					# Функція для надсилання повідомлення з файлом db
 					def send_db_file(telegram_chat_id, file_path):
 						with open(file_path, 'rb') as db_file:
 							bot.send_document(telegram_chat_id, db_file)
-							print(f"Файл {file_path} успішно надіслано в Telegram!")
+							app.logger.info(f"Файл {file_path} успішно надіслано в Telegram!")
 
 					def send_telegram(title, url, price, date, id_ads):
 						params = {	'chat_id': telegram_chat_id,
@@ -559,20 +550,20 @@ def go_dom(*args):
 						}
 						session = requests.Session()
 						response = session.get(base_url_telegram, params=params)
-						print ("Ok")
+						app.logger.info("Ok")
 
 					ads = olx_parse(base_url, headers)
 					process_send(ads)
 					send_db_file(telegram_chat_id, file_path)
 					
-					print ('Все хорощо я закончил')
+					app.logger.info('Все хорощо я закончил')
 					time.sleep(7200) #7200 sec
-					print("time =", t)
+					app.logger.info("time =", t)
 			else:
-				print('sleep 46800 sec')
+				app.logger.info('sleep 46800 sec')
 				time.sleep(46800)
 	except Exception as e:
-		print(f"Помилка у go_dom: {e}")
+		app.logger.info(f"Помилка у go_dom: {e}")
 
 	
 
