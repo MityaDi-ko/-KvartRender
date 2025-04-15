@@ -20,7 +20,7 @@ from datetime import datetime
 import time
 from time import sleep
 
-import threading
+from multiprocessing import Process
 
 
 
@@ -629,8 +629,10 @@ bot.remove_webhook()
 bot.set_webhook(url=url_ng)		
 	
 if __name__ == "__main__":
-	threading.Thread(target=go_kvar, args=(1,)).start()
-	threading.Thread(target=go_dom, args=(1,)).start()
+	print("Запуск процесів...")
+	Process(target=go_kvar, args=(1,)).start()
+	Process(target=go_dom, args=(1,)).start()
+	print("Процеси запущено.")
 	#Встановлюємо порт із змінної середовища або використовуємо порт за замовчуванням
 	PORT = int(os.getenv("PORT", 10000))
 	app.run(host="0.0.0.0", port=PORT)
