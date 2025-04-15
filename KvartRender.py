@@ -22,14 +22,7 @@ from time import sleep
 
 import threading
 
-# Конфігурація логів
-logging.basicConfig(
-    level=logging.DEBUG,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-    handlers=[
-        logging.StreamHandler()
-    ]
-)
+
 
 # Укажите токен телеграм
 telegram_token = os.getenv("TELEGRAM_TOKEN")
@@ -40,9 +33,14 @@ url_ng = os.getenv("URL_NG")
 
 app = Flask(__name__)
 
-# За замовченням WARNING а тепер INFO WARNING ERROR DEBUG
-app.logger.setLevel(logging.INFO)
+# Додаємо StreamHandler до логера Flask
+handler = logging.StreamHandler()
+handler.setLevel(logging.DEBUG)  # Установіть потрібний рівень
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+handler.setFormatter(formatter)
 app.logger.addHandler(handler)
+
+app.logger.setLevel(logging.DEBUG)
 
 @app.route('/', methods=['POST'])
 def webhook():
