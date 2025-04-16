@@ -17,11 +17,11 @@ import telebot
 from telebot import types
 from flask import Flask, request
 
-from multiprocessing import Process
+from multiprocessing import Process#, freeze_support
 import schedule
 from datetime import datetime
 
-
+#freeze_support()
 
 # Укажите токен телеграм
 telegram_token = os.getenv("TELEGRAM_TOKEN")
@@ -601,10 +601,7 @@ def process_help_command(message):
 def echo_all(message):
 	bot.reply_to(message, message.text)
 		
-# Снимаем вебхук перед повторной установкой (избавляет от некоторых проблем)
-bot.remove_webhook()
-# Ставим заново вебхук
-bot.set_webhook(url=url_ng)		
+	
 
 # Функція для запуску планувальника
 def run_scheduler():
@@ -612,14 +609,15 @@ def run_scheduler():
 	schedule.every(5).hours.do(go_dom)
 	while True:
 		schedule.run_pending()
-		time.sleep(1)
+		time.sleep(3611)
 
 	
 if __name__ == "__main__":
 	print("Запуск планувальника...")
-	# Запуск планувальника в окремому процесі
-	scheduler_process = Process(target=run_scheduler)
-	scheduler_process.start()
+	# Снимаем вебхук перед повторной установкой (избавляет от некоторых проблем)
+	bot.remove_webhook()
+	# Ставим заново вебхук
+	bot.set_webhook(url=url_ng)	 
 	
 	# Запуск планувальника в окремому процесі
 	scheduler_process = Process(target=run_scheduler)
