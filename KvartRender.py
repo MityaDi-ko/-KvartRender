@@ -16,6 +16,7 @@ import re
 import telebot
 from telebot import types
 from flask import Flask, request
+from asgiref.wsgi import WsgiToAsgi
 
 from multiprocessing import Process#, freeze_support
 import schedule
@@ -31,6 +32,9 @@ url_ng = os.getenv("URL_NG")
 
 
 app = Flask(__name__)
+
+# Перетворення Flask-додатка на ASGI-додаток
+asgi_app = WsgiToAsgi(app)
 
 # Функція для логування
 logging.basicConfig(
