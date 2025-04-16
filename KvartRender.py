@@ -44,6 +44,11 @@ logging.basicConfig(
 
 app.logger.setLevel(logging.DEBUG)
 
+@app.before_request
+def log_request():
+    app.logger.info(f"Вхідний запит: {request.method} {request.url}")
+
+
 @app.route('/', methods=['POST'])
 def webhook():
 		read = request.stream.read().decode('utf-8')
