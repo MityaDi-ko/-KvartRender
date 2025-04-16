@@ -614,14 +614,16 @@ def run_scheduler():
 	
 if __name__ == "__main__":
 	print("Запуск планувальника...")
-	# Снимаем вебхук перед повторной установкой (избавляет от некоторых проблем)
-	bot.remove_webhook()
-	# Ставим заново вебхук
-	bot.set_webhook(url=url_ng)	 
+	current_webhook = bot.get_webhook_info()
+	if current_webhook.url != url_ng:
+		# Снимаем вебхук перед повторной установкой (избавляет от некоторых проблем)
+		bot.remove_webhook()
+		# Ставим заново вебхук
+		bot.set_webhook(url=url_ng)	 
 	
 	# Запуск планувальника в окремому процесі
 	scheduler_process = Process(target=run_scheduler)
-	scheduler_process.start()
+	scheduler_process.start()  # Додано запуск процесу
 	
 	#Встановлюємо порт із змінної середовища або використовуємо порт за замовчуванням
 	PORT = int(os.getenv("PORT", 10000))
