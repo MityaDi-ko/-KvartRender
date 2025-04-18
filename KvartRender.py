@@ -627,30 +627,30 @@ def process_help_command(message):
 
 @bot.message_handler(commands=['start'])
 def send_welcome(message):
-    # Створюємо меню
-    keyboard = types.ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=False)
-    button_kvar = types.KeyboardButton('Для 🏘')
-    button_dom = types.KeyboardButton('Для 🏠')
-    keyboard.add(button_kvar, button_dom)
+	# Створюємо меню
+	keyboard = types.ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=False)
+	button_kvar = types.KeyboardButton('Для 🏘')
+	button_dom = types.KeyboardButton('Для 🏠')
+	keyboard.add(button_kvar, button_dom)
 
-    # Відправляємо повідомлення з меню
-    # bot.send_message(message.chat.id, "Виберіть дію:", reply_markup=keyboard)
+	# Відправляємо повідомлення з меню
+	# bot.send_message(message.chat.id, "Виберіть дію:", reply_markup=keyboard)
 
 # Обробник натискань кнопок
 @bot.message_handler(func=lambda message: message.text == 'Запустити kvar')
 def handle_kvar_button(message):
-    try:
-        go_kvar()  # Викликаємо функцію go_kvar
-    except Exception as e:
-        bot.reply_to(message, f"Сталася помилка: {e}")
+	try:
+		go_kvar()  # Викликаємо функцію go_kvar
+	except Exception as e:
+		bot.reply_to(message, f"Сталася помилка: {e}")
 		app.logger.error(f"Помилка після натискання кнопки go_kvar {e}")
 
 @bot.message_handler(func=lambda message: message.text == 'Запустити dom')
 def handle_dom_button(message):
-    try:
-        go_dom()  # Викликаємо функцію go_dom
-    except Exception as e:
-        bot.reply_to(message, f"Сталася помилка: {e}")
+	try:
+		go_dom()  # Викликаємо функцію go_dom
+	except Exception as e:
+		bot.reply_to(message, f"Сталася помилка: {e}")
 		app.logger.error(f"Помилка після натискання кнопки go_dom {e}")
 
 @bot.message_handler(func=lambda message: True)
