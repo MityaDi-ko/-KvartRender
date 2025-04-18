@@ -625,6 +625,27 @@ def callback_worker(call):
 def process_help_command(message):
 	bot.reply_to(message, "Напиши мне что-нибудь, и я отпрпавлю этот текст тебе в ответ!")
 
+# Функція для запуску функції go_kvar за командою бота
+@bot.message_handler(commands=['kvar'])
+def manual_kvar_execution(message):
+	try:
+		app.logger.info("Отримано команду /kvar, запуск go_kvar вручну.")
+		# Виконання функції go_kvar
+		go_kvar()
+	except Exception as e:
+		app.logger.error(f"Помилка при виконанні go_kvar вручну: {e}")
+		bot.reply_to(message, f"Сталася помилка: {e}")
+
+# Функція для запуску функції go_dom за командою бота
+@bot.message_handler(commands=['dom'])
+def manual_dom_execution(message):
+	try:
+		app.logger.info("Отримано команду /dom, запуск go_dom вручну.")
+		# Виконання функції go_dom
+		go_dom()
+	except Exception as e:
+		app.logger.error(f"Помилка при виконанні go_dom вручну: {e}")
+		bot.reply_to(message, f"Сталася помилка: {e}")
 
 @bot.message_handler(func=lambda message: True)
 def echo_all(message):
@@ -647,29 +668,6 @@ def run_scheduler():
 			time.sleep(4444)
 	except Exception as e:
 		app.logger.error(f"Помилка в функції планувальнику: {e}")
-
-# Функція для запуску функції go_kvar за командою бота
-@bot.message_handler(commands=['kvar'])
-def manual_kvar_execution(message):
-	try:
-		app.logger.info("Отримано команду /kvar, запуск go_kvar вручну.")
-		# Виконання функції go_kvar
-		go_kvar()
-	except Exception as e:
-		app.logger.error(f"Помилка при виконанні go_kvar вручну: {e}")
-		bot.reply_to(message, f"Сталася помилка: {e}")
-
-# Функція для запуску функції go_dom за командою бота
-@bot.message_handler(commands=['dom'])
-def manual_dom_execution(message):
-	try:
-		app.logger.info("Отримано команду /dom, запуск go_dom вручну.")
-		# Виконання функції go_dom
-		go_dom()
-	except Exception as e:
-		app.logger.error(f"Помилка при виконанні go_dom вручну: {e}")
-		bot.reply_to(message, f"Сталася помилка: {e}")
-		
 		
 	# Запуск планувальника в окремому процесі
 	#scheduler_process = Process(target=run_scheduler)
