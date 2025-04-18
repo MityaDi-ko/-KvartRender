@@ -623,29 +623,35 @@ def callback_worker(call):
 
 @bot.message_handler(commands=['help'])
 def process_help_command(message):
-	bot.reply_to(message, "Напиши мне что-нибудь, и я отпрпавлю этот текст тебе в ответ!")
+	bot.reply_to(message, "Якщо ви не бачите кнопок запуску функцій. - потрібно відправити команду /start")
 
-# Функція для запуску функції go_kvar за командою бота
-@bot.message_handler(commands=['kvar'])
-def manual_kvar_execution(message):
-	try:
-		app.logger.info("Отримано команду /kvar, запуск go_kvar вручну.")
-		# Виконання функції go_kvar
-		go_kvar()
-	except Exception as e:
-		app.logger.error(f"Помилка при виконанні go_kvar вручну: {e}")
-		bot.reply_to(message, f"Сталася помилка: {e}")
+@bot.message_handler(commands=['start'])
+def send_welcome(message):
+    # Створюємо меню
+    keyboard = types.ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=False)
+    button_kvar = types.KeyboardButton('Для 🏘')
+    button_dom = types.KeyboardButton('Для 🏠')
+    keyboard.add(button_kvar, button_dom)
 
-# Функція для запуску функції go_dom за командою бота
-@bot.message_handler(commands=['dom'])
-def manual_dom_execution(message):
-	try:
-		app.logger.info("Отримано команду /dom, запуск go_dom вручну.")
-		# Виконання функції go_dom
-		go_dom()
-	except Exception as e:
-		app.logger.error(f"Помилка при виконанні go_dom вручну: {e}")
-		bot.reply_to(message, f"Сталася помилка: {e}")
+    # Відправляємо повідомлення з меню
+    # bot.send_message(message.chat.id, "Виберіть дію:", reply_markup=keyboard)
+
+# Обробник натискань кнопок
+@bot.message_handler(func=lambda message: message.text == 'Запустити kvar')
+def handle_kvar_button(message):
+    try:
+        go_kvar()  # Викликаємо функцію go_kvar
+    except Exception as e:
+        bot.reply_to(message, f"Сталася помилка: {e}")
+		app.logger.error(f"Помилка після натискання кнопки go_kvar {e}")
+
+@bot.message_handler(func=lambda message: message.text == 'Запустити dom')
+def handle_dom_button(message):
+    try:
+        go_dom()  # Викликаємо функцію go_dom
+    except Exception as e:
+        bot.reply_to(message, f"Сталася помилка: {e}")
+		app.logger.error(f"Помилка після натискання кнопки go_dom {e}")
 
 @bot.message_handler(func=lambda message: True)
 def echo_all(message):
