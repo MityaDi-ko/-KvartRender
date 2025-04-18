@@ -77,10 +77,8 @@ def after_request(response):
 def webhook():
 		read = request.stream.read().decode('utf-8')
 		update = telebot.types.Update.de_json(read)
-		if update.message.chat.id == chat_id.KVAR or update.message.chat.id == chat_id.DOM:
-			bot.process_new_updates([update])
-		else:
-			app.logger.info(f"Пропускається chat_id: {update.message.chat.id}")
+		app.logger.info(f"Обробляється chat_id: {update.message.chat.id}")
+		bot.process_new_updates([update])
 		return 'ok', 200
 
 @app.route("/", methods=["HEAD", "GET"])
