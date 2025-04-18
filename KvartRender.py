@@ -637,17 +637,19 @@ def send_welcome(message):
 	bot.send_message(message.chat.id, "Оберіть в яку бесіду відправити результат:", reply_markup=keyboard)
 
 # Обробник натискань кнопок
-@bot.message_handler(func=lambda message: message.text == 'Запустити kvar')
+@bot.message_handler(func=lambda message: message.text == '🏘 3k')
 def handle_kvar_button(message):
 	try:
+		bot.reply_to(message, "Відповідь надсилається в чат 🏘 3k")
 		go_kvar()  # Викликаємо функцію go_kvar
 	except Exception as e:
 		bot.reply_to(message, f"Сталася помилка: {e}")
 		app.logger.error(f"Помилка після натискання кнопки go_kvar {e}")
 
-@bot.message_handler(func=lambda message: message.text == 'Запустити dom')
+@bot.message_handler(func=lambda message: message.text == '🏠 Дома')
 def handle_dom_button(message):
 	try:
+		bot.reply_to(message, "Відповідь надсилається в чат 🏠 Дома")
 		go_dom()  # Викликаємо функцію go_dom
 	except Exception as e:
 		bot.reply_to(message, f"Сталася помилка: {e}")
