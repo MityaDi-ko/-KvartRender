@@ -16,9 +16,9 @@ import re
 import telebot
 from telebot import types
 from flask import Flask, request
-from asgiref.wsgi import WsgiToAsgi
 
-from multiprocessing import Process#, freeze_support
+from threading import Thread
+#from multiprocessing import Process, freeze_support
 import schedule
 from datetime import datetime
 
@@ -33,24 +33,44 @@ url_ng = os.getenv("URL_NG")
 
 app = Flask(__name__)
 
-# Перетворення Flask-додатка на ASGI-додаток
-asgi_app = WsgiToAsgi(app)
-
+def setup_webhook():
+	try:
+		current_webhook = bot.get_webhook_info()
+		if current_webhook.url != url_ng:
+			# Снимаем вебхук перед повторной установкой (избавляет от некоторых проблем)
+			bot.remove_webhook()
+			# Ставим заново вебхук
+			bot.set_webhook(url=url_ng)
+			app.logger.info(f"Вебхук оновлено {url_ng}")
+		else:
+			app.logger.info("Вебхук вже оновлено")
+	except Exception as e:
+		app.logger.info(f"Помилка при встановлені вебхук: {e}")
+		
+setup_webhook()
 # Функція для логування
+# Основний лог файлайл
 logging.basicConfig(
-    level=logging.DEBUG,  # Рівень логування
-    format='%(asctime)s - %(levelname)s - %(message)s',  # Формат повідомлень
-    handlers=[
-        logging.FileHandler("app.log"),  # Логи у файл
-        logging.StreamHandler()  # Виведення в консоль
-    ]
+	filename='app.log',
+	encoding='utf-8',
+	level=logging.DEBUG,  # Рівень логування
+	format='%(asctime)s - %(levelname)s - %(message)s',  # Формат повідомлень
 )
-
+# Створюємо хендлер для консолі
+console_handler = logging.StreamHandler()
+console_handler.setLevel(logging.DEBUG)
+console_formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
+console_handler.setFormatter(console_formatter)
+# Додаємо хендлер для app.log
+app.logger.addHandler(console_handler)
 app.logger.setLevel(logging.DEBUG)
 
-@app.before_request
-def log_request():
-    app.logger.info(f"Вхідний запит: {request.method} {request.url}")
+
+@app.after_request
+def after_request(response):
+     timestamp = datetime.now().strftime('[%Y-%b-%d %H:%M]')
+     app.logger.info('%s %s %s %s %s %s', timestamp, request.remote_addr, request.method, request.scheme, request.full_path, response.status)
+     return response
 
 
 @app.route('/', methods=['POST'])
@@ -614,29 +634,30 @@ def echo_all(message):
 
 # Функція для запуску планувальника
 def run_scheduler():
-	schedule.every(5).hours.do(go_kvar)
-	schedule.every(5).hours.do(go_dom)
-	while True:
-		schedule.run_pending()
-		time.sleep(3611)
-
-	
-if __name__ == "__main__":
-	print("Запуск планувальника...")
-	current_webhook = bot.get_webhook_info()
-	if current_webhook.url != url_ng:
-		# Снимаем вебхук перед повторной установкой (избавляет от некоторых проблем)
-		bot.remove_webhook()
-		# Ставим заново вебхук
-		bot.set_webhook(url=url_ng)	 
+	try:
+		app.logger.info("Планувальник запущений.")
+		schedule.every(5).hours.do(go_kvar)
+		schedule.every(5).hours.do(go_dom)
+		while True:
+			schedule.run_pending()
+			app.logger.info("Задачі обробляються...")
+			time.sleep(44)
+	except Exception as e:
+		app.logger.error(f"Помилка в функції планувальнику: {e}")
 	
 	# Запуск планувальника в окремому процесі
-	scheduler_process = Process(target=run_scheduler)
-	scheduler_process.start()  # Додано запуск процесу
+	#scheduler_process = Process(target=run_scheduler)
+	#scheduler_process.start()  # Додано запуск процесу
 	
-	#Встановлюємо порт із змінної середовища або використовуємо порт за замовчуванням
-	PORT = int(os.getenv("PORT", 10000))
-	app.run(host="0.0.0.0", port=PORT)
-	
-	# При завершенні основного процесу зупиніть планувальник
-	scheduler_process.join()
+def start_background_scheduler():
+	if not schedule.jobs: #Щоб не запускався двічі
+		try:
+			app.logger.info("Запуск потоку для планувальника...")
+			# Запуск планувальника у окремому потоці,
+			scheduler_thread = Thread(target=run_scheduler, daemon=True)
+			scheduler_thread.start()
+			app.logger.info("Потік для планувальника запущено.")
+		except Exception as e:
+			app.logger.error(f"Помилка запуску планувальнику: {e}")
+			
+start_background_scheduler()
