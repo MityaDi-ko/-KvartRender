@@ -628,7 +628,10 @@ def process_help_command(message):
 
 @bot.message_handler(func=lambda message: True)
 def echo_all(message):
-	bot.reply_to(message, message.text)
+	try:
+		bot.reply_to(message, message.text)
+	except Exception as e:
+		app.logger.error(f"Помилка для chat_id {message.chat.id}: {e}")
 		
 	
 
@@ -641,7 +644,7 @@ def run_scheduler():
 		while True:
 			schedule.run_pending()
 			app.logger.info("Задачі обробляються...")
-			time.sleep(44)
+			time.sleep(4444)
 	except Exception as e:
 		app.logger.error(f"Помилка в функції планувальнику: {e}")
 	
