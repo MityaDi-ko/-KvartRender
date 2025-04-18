@@ -629,12 +629,12 @@ def process_help_command(message):
 def send_welcome(message):
 	# Створюємо меню
 	keyboard = types.ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=False)
-	button_kvar = types.KeyboardButton('Для 🏘')
-	button_dom = types.KeyboardButton('Для 🏠')
+	button_kvar = types.KeyboardButton('🏘 3k')
+	button_dom = types.KeyboardButton('🏠 Дома')
 	keyboard.add(button_kvar, button_dom)
 
 	# Відправляємо повідомлення з меню
-	# bot.send_message(message.chat.id, "Виберіть дію:", reply_markup=keyboard)
+	bot.send_message(message.chat.id, "Оберіть в яку бесіду відправити результат:", reply_markup=keyboard)
 
 # Обробник натискань кнопок
 @bot.message_handler(func=lambda message: message.text == 'Запустити kvar')
