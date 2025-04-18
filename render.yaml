@@ -20,3 +20,4 @@ services:
   buildCommand: pip install -r requirements.txt
   startCommand: gunicorn KvartRender:app
 version: "1"
+pythonVersion: 3.13.3
