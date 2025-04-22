@@ -640,7 +640,7 @@ def send_welcome(message):
 	keyboard.add(button_run)
 
 	# Відправляємо повідомлення з меню
-	bot.send_message(message.chat.id, " ", reply_markup=keyboard)
+	bot.send_message(message.chat.id, "3", reply_markup=keyboard)
 
 # Обробник натискань кнопок
 @bot.message_handler(func=lambda message: message.text == '🏢 🏠')
@@ -654,14 +654,7 @@ def handle_kvar_button(message):
 		bot.reply_to(message, f"Сталася помилка: {e}")
 		app.logger.error(f"Помилка після натискання кнопки{e}")
 
-#@bot.message_handler(func=lambda message: message.text == '🏠 Дома')
-#def handle_dom_button(message):
-	#try:
-		#bot.reply_to(message, "Відповідь надсилається в чат 🏠 Дома")
-		#go_dom()  # Викликаємо функцію go_dom
-	#except Exception as e:
-		#bot.reply_to(message, f"Сталася помилка: {e}")
-		#app.logger.error(f"Помилка після натискання кнопки go_dom {e}")
+
 
 @bot.message_handler(commands=['run'])
 def run_command(message):
@@ -678,22 +671,5 @@ def echo_all(message):
 	except Exception as e:
 		app.logger.error(f"Помилка для chat_id {message.chat.id}: {e}")
 		
-	
 
-# Функція для запуску планувальника
-#def run_scheduler():
-	#try:
-		#app.logger.info("Планувальник запущений.")
-		#schedule.every(5).hours.do(go_kvar)
-		#schedule.every(5).hours.do(go_dom)
-		#while True:
-			#schedule.run_pending()
-			#app.logger.info("Задачі в очикуванні")
-			#time.sleep(60)
-	#except Exception as e:
-		#app.logger.error(f"Помилка в функції планувальнику: {e}")
-		
-	# Запуск планувальника в окремому процесі
-	#scheduler_process = Process(target=run_scheduler)
-	#scheduler_process.start()  # Додано запуск процесу
 	
