@@ -598,7 +598,7 @@ def callback_worker(call):
 				types.InlineKeyboardButton("♻️", callback_data='1'),
 				types.InlineKeyboardButton("📴", callback_data='2'),
 				types.InlineKeyboardButton("🅱️ 1", callback_data='3'))
-			bot.edit_message_text(chat_id=cid, message_id=mid, text=tex, reply_markup=markup)
+			bot.edit_message_reply_markup(chat_id=cid, message_id=mid, reply_markup=markup)
 		# Если нажали на 2 кнопку
 		elif call.data == '2': 
 			cid = call.message.chat.id
@@ -609,7 +609,7 @@ def callback_worker(call):
 				types.InlineKeyboardButton("♻️", callback_data='1'),
 				types.InlineKeyboardButton("📴 1", callback_data='2'),
 				types.InlineKeyboardButton("🅱️", callback_data='3'))
-			bot.edit_message_text(chat_id=cid, message_id=mid, text=tex, reply_markup=markup)
+			bot.edit_message_reply_markup(chat_id=cid, message_id=mid, reply_markup=markup)
 		# Если нажали на 3 кнопку
 		else:
 			cid = call.message.chat.id
@@ -620,7 +620,7 @@ def callback_worker(call):
 				types.InlineKeyboardButton("♻️ 1", callback_data='1'),
 				types.InlineKeyboardButton("📴", callback_data='2'),
 				types.InlineKeyboardButton("🅱️", callback_data='3'))
-			bot.edit_message_text(chat_id=cid, message_id=mid, text=tex, reply_markup=markup)
+			bot.edit_message_reply_markup(chat_id=cid, message_id=mid, reply_markup=markup)
 		
 def start_background_scheduler():
 	if not schedule.jobs: #Щоб не запускався двічі
