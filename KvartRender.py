@@ -603,7 +603,7 @@ def callback_worker(call):
 				types.InlineKeyboardButton("♻️", callback_data='1'),
 				types.InlineKeyboardButton("📴 1", callback_data='2'),
 				types.InlineKeyboardButton("🅱️", callback_data='3'))
-			bot.edit_message_reply_markup(inline_message_id=call.inline_message_id reply_markup=markup)
+			bot.edit_message_reply_markup(inline_message_id=call.inline_message_id, reply_markup=markup)
 		# Если нажали на 3 кнопку
 		else:
 
