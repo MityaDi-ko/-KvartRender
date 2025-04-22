@@ -593,9 +593,9 @@ def callback_worker(call):
 			tex = call.message.text
 			markup = types.InlineKeyboardMarkup()
 			markup.row(
-				types.InlineKeyboardButton("\u267b\ufe0f", callback_data='1'),
-				types.InlineKeyboardButton("\ud83d\udcf4", callback_data='2'),
-				types.InlineKeyboardButton("\ud83c\udd71\ufe0f 1", callback_data='3'))
+				types.InlineKeyboardButton("♻️", callback_data='1'),
+				types.InlineKeyboardButton("📴", callback_data='2'),
+				types.InlineKeyboardButton("🅱️ 1", callback_data='3'))
 			bot.edit_message_text(chat_id=cid, message_id=mid, text=tex, reply_markup=markup)
 		# Если нажали на 2 кнопку
 		elif call.data == '2': 
@@ -604,9 +604,9 @@ def callback_worker(call):
 			tex = call.message.text
 			markup = types.InlineKeyboardMarkup()
 			markup.row(
-				types.InlineKeyboardButton("\u267b\ufe0f", callback_data='1'),
-				types.InlineKeyboardButton("\ud83d\udcf4 1", callback_data='2'),
-				types.InlineKeyboardButton("\ud83c\udd71\ufe0f", callback_data='3'))
+				types.InlineKeyboardButton("♻️", callback_data='1'),
+				types.InlineKeyboardButton("📴 1", callback_data='2'),
+				types.InlineKeyboardButton("🅱️", callback_data='3'))
 			bot.edit_message_text(chat_id=cid, message_id=mid, text=tex, reply_markup=markup)
 		# Если нажали на 3 кнопку
 		else:
@@ -614,9 +614,10 @@ def callback_worker(call):
 			mid = call.message.message_id 
 			tex = call.message.text
 			markup = types.InlineKeyboardMarkup()
-			markup.row(types.InlineKeyboardButton("\u267b\ufe0f 1", callback_data='1'),
-				types.InlineKeyboardButton("\ud83d\udcf4", callback_data='2'),
-				types.InlineKeyboardButton("\ud83c\udd71\ufe0f", callback_data='3'))
+			markup.row(
+				types.InlineKeyboardButton("♻️ 1", callback_data='1'),
+				types.InlineKeyboardButton("📴", callback_data='2'),
+				types.InlineKeyboardButton("🅱️", callback_data='3'))
 			bot.edit_message_text(chat_id=cid, message_id=mid, text=tex, reply_markup=markup)
 		
 def start_background_scheduler():
