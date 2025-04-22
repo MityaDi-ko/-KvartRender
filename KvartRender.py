@@ -590,37 +590,29 @@ def go_dom(*args):
 def callback_worker(call):
 		# Если нажали на 1 кнопку
 		if call.data == '3':
-			cid = call.message.chat.id
-			mid = call.message.message_id 
-			tex = call.message.text
 			markup = types.InlineKeyboardMarkup()
 			markup.row(
 				types.InlineKeyboardButton("♻️", callback_data='1'),
 				types.InlineKeyboardButton("📴", callback_data='2'),
 				types.InlineKeyboardButton("🅱️ 1", callback_data='3'))
-			bot.edit_message_reply_markup(chat_id=cid, message_id=mid, reply_markup=markup)
+			bot.edit_message_reply_markup(inline_message_id=call.inline_message_id, reply_markup=markup)
 		# Если нажали на 2 кнопку
 		elif call.data == '2': 
-			cid = call.message.chat.id
-			mid = call.message.message_id 
-			tex = call.message.text
 			markup = types.InlineKeyboardMarkup()
 			markup.row(
 				types.InlineKeyboardButton("♻️", callback_data='1'),
 				types.InlineKeyboardButton("📴 1", callback_data='2'),
 				types.InlineKeyboardButton("🅱️", callback_data='3'))
-			bot.edit_message_reply_markup(chat_id=cid, message_id=mid, reply_markup=markup)
+			bot.edit_message_reply_markup(inline_message_id=call.inline_message_id reply_markup=markup)
 		# Если нажали на 3 кнопку
 		else:
-			cid = call.message.chat.id
-			mid = call.message.message_id 
-			tex = call.message.text
+
 			markup = types.InlineKeyboardMarkup()
 			markup.row(
 				types.InlineKeyboardButton("♻️ 1", callback_data='1'),
 				types.InlineKeyboardButton("📴", callback_data='2'),
 				types.InlineKeyboardButton("🅱️", callback_data='3'))
-			bot.edit_message_reply_markup(chat_id=cid, message_id=mid, reply_markup=markup)
+			bot.edit_message_reply_markup(inline_message_id=call.inline_message_id, reply_markup=markup)
 		
 def start_background_scheduler():
 	if not schedule.jobs: #Щоб не запускався двічі
