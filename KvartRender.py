@@ -77,7 +77,7 @@ def after_request(response):
 def webhook():
 		read = request.stream.read().decode('utf-8')
 		update = telebot.types.Update.de_json(read)
-		if update.message and update.message.text == "/run":
+		if update.message and update.message.text.startswith == "/run":
 			start_background_scheduler()
 		#app.logger.info(f"Обробляється chat_id: {update.message.chat.id}")
 		bot.process_new_updates([update])
