@@ -79,10 +79,12 @@ def webhook():
 	update = telebot.types.Update.de_json(read)
 	data = request.get_json()
 	if data.get("message"):
-		chat_id = data["message"]["chat"]["id"]
-		text = data["message"]["text"]
+		chat_id = data.get("message", {}).get("chat", {}).get("id")
+		text = data.get("message", {}).get("text")
+		user_id = message.get("from", {}).get("id")  # Отримуємо ID користувача
+		is_bot = message.get("from", {}).get("is_bot", False)  # Перевіряємо, чи це бот
 		# Обробляємо команду /run
-		if text == "/run":
+		if text == "/run" and not is_bot:
 			bot.send_message(chat_id, "Команда /run запущена!")
 			start_background_scheduler()
 	#app.logger.info(f"Обробляється chat_id: {update.message.chat.id}")
