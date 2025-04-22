@@ -77,7 +77,8 @@ def after_request(response):
 def webhook():
 		read = request.stream.read().decode('utf-8')
 		update = telebot.types.Update.de_json(read)
-		if update.message and update.message.text == "/run@Kh_3k_bot":
+		if text == "/run":
+			bot.send_message(chat_id, "запуск командою")
 			start_background_scheduler()
 		#app.logger.info(f"Обробляється chat_id: {update.message.chat.id}")
 		bot.process_new_updates([update])
@@ -588,28 +589,39 @@ def go_dom(*args):
 # Обработчик нажатий на кнопки 
 @bot.callback_query_handler(func=lambda call: True) 
 def callback_worker(call):
-		cid = call.message.chat.id
-		mid = call.message.message_id 
-		markup = types.InlineKeyboardMarkup()
 		# Если нажали на 1 кнопку
 		if call.data == '3':
+			cid = call.message.chat.id
+			mid = call.message.message_id 
+			tex = call.message.text
+			markup = types.InlineKeyboardMarkup()
 			markup.row(
 				types.InlineKeyboardButton("♻️", callback_data='1'),
 				types.InlineKeyboardButton("📴", callback_data='2'),
 				types.InlineKeyboardButton("🅱️ 1", callback_data='3'))
+			bot.edit_message_text(chat_id=cid, message_id=mid, text=tex, reply_markup=markup)
 		# Если нажали на 2 кнопку
 		elif call.data == '2': 
+			cid = call.message.chat.id
+			mid = call.message.message_id 
+			tex = call.message.text
+			markup = types.InlineKeyboardMarkup()
 			markup.row(
 				types.InlineKeyboardButton("♻️", callback_data='1'),
 				types.InlineKeyboardButton("📴 1", callback_data='2'),
 				types.InlineKeyboardButton("🅱️", callback_data='3'))
+			bot.edit_message_text(chat_id=cid, message_id=mid, text=tex, reply_markup=markup)
 		# Если нажали на 3 кнопку
 		else:
+			cid = call.message.chat.id
+			mid = call.message.message_id 
+			tex = call.message.text
+			markup = types.InlineKeyboardMarkup()
 			markup.row(
 				types.InlineKeyboardButton("♻️ 1", callback_data='1'),
 				types.InlineKeyboardButton("📴", callback_data='2'),
 				types.InlineKeyboardButton("🅱️", callback_data='3'))
-		bot.edit_message_reply_markup(chat_id=cid, message_id=mid, reply_markup=markup)
+			bot.edit_message_text(chat_id=cid, message_id=mid, text=tex, reply_markup=markup)
 		
 def start_background_scheduler():
 	if not schedule.jobs: #Щоб не запускався двічі
