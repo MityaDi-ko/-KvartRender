@@ -75,11 +75,19 @@ def after_request(response):
 
 @app.route('/', methods=['POST'])
 def webhook():
-		read = request.stream.read().decode('utf-8')
-		update = telebot.types.Update.de_json(read)
-		#app.logger.info(f"Обробляється chat_id: {update.message.chat.id}")
-		bot.process_new_updates([update])
-		return 'ok', 200
+	read = request.stream.read().decode('utf-8')
+	update = telebot.types.Update.de_json(read)
+	data = request.get_json()
+	if data.get("message"):
+		chat_id = data["message"]["chat"]["id"]
+		text = data["message"]["text"]
+		# Обробляємо команду /run
+		if text == "/run":
+			bot.send_message(chat_id, "Команда /run запущена!")
+			start_background_scheduler()
+	#app.logger.info(f"Обробляється chat_id: {update.message.chat.id}")
+	bot.process_new_updates([update])
+	return 'ok', 200
 
 @app.route("/", methods=["HEAD", "GET"])
 def home():
@@ -581,10 +589,6 @@ def go_dom(*args):
 
 	
 
-@bot.message_handler(commands=['run'])
-def run_command(message):
-	handle_run_command(message.chat.id)
-	start_background_scheduler()
 
 # Обработчик нажатий на кнопки 
 @bot.callback_query_handler(func=lambda call: True) 
