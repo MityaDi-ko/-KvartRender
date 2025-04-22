@@ -15,7 +15,7 @@ import re
 
 import telebot
 from telebot import types
-from flask import Flask, request, jsonify
+from flask import Flask, request
 
 from threading import Thread
 #from multiprocessing import Process, freeze_support
@@ -73,24 +73,17 @@ def after_request(response):
      return response
 
 
-	 
 @app.route('/', methods=['POST'])
 def webhook():
-	read = request.stream.read().decode('utf-8')
-	update = telebot.types.Update.de_json(read)
-	data = request.get_json()
-	if data.get("message"):
-		chat_id = data.get("message", {}).get("chat", {}).get("id")
-		text = data.get("message", {}).get("text")
-		user_id = message.get("from", {}).get("id")  # Отримуємо ID користувача
-		is_bot = message.get("from", {}).get("is_bot", False)  # Перевіряємо, чи це бот
-		# Обробляємо команду /run
-		if text == "/run" and not is_bot:
-			bot.send_message(chat_id, "Команда /run запущена!")
+		read = request.stream.read().decode('utf-8')
+		update = telebot.types.Update.de_json(read)
+		if update.message and update.message.text == "/run":
+			chat_id = update.message.chat.id  # Отримуємо chat_id
+			bot.send_message(chat_id, "запуск командою")
 			start_background_scheduler()
-	#app.logger.info(f"Обробляється chat_id: {update.message.chat.id}")
-	bot.process_new_updates([update])
-	return 'ok', 200
+		#app.logger.info(f"Обробляється chat_id: {update.message.chat.id}")
+		bot.process_new_updates([update])
+		return 'ok', 200
 
 @app.route("/", methods=["HEAD", "GET"])
 def home():
@@ -591,6 +584,7 @@ def go_dom(*args):
 		app.logger.info(f"Помилка у go_dom: {e}")
 
 	
+
 
 
 # Обработчик нажатий на кнопки 
