@@ -15,7 +15,7 @@ import re
 
 import telebot
 from telebot import types
-from flask import Flask, request
+from flask import Flask, request, jsonify
 
 from threading import Thread
 #from multiprocessing import Process, freeze_support
