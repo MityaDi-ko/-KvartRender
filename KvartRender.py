@@ -77,6 +77,8 @@ def after_request(response):
 def webhook():
 		read = request.stream.read().decode('utf-8')
 		update = telebot.types.Update.de_json(read)
+		if update.message and update.message.text == "/run":
+			start_background_scheduler()
 		#app.logger.info(f"Обробляється chat_id: {update.message.chat.id}")
 		bot.process_new_updates([update])
 		return 'ok', 200
@@ -657,13 +659,13 @@ def handle_kvar_button(message):
 
 
 
-@bot.message_handler(commands=['run'])
-def run_command(message):
-	try:
-		start_background_scheduler()
-		bot.reply_to(message, "Функції запущені командою")
-	except Exception as e:
-		app.logger.error(f"Помилка для chat_id {message.chat.id}: {e}")
+#@bot.message_handler(commands=['run'])
+#def run_command(message):
+	#try:
+		#start_background_scheduler()
+		#bot.reply_to(message, "Функції запущені командою")
+	#except Exception as e:
+		#app.logger.error(f"Помилка для chat_id {message.chat.id}: {e}")
 
 @bot.message_handler(func=lambda message: True)
 def echo_all(message):
