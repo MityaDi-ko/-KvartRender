@@ -648,7 +648,7 @@ def handle_kvar_button(message):
 	try:
 		#bot.reply_to(message, "Відповідь надсилається в чат 🏢 🏠")
 		start_background_scheduler()
-		bot.send_chat_action(message.chat.id, 'typing')
+		bot.reply_to(message, "Функції запущені натисканням кнопки")
   # Викликаємо функцію go_kvar
 	except Exception as e:
 		bot.reply_to(message, f"Сталася помилка: {e}")
@@ -660,7 +660,7 @@ def handle_kvar_button(message):
 def run_command(message):
 	try:
 		start_background_scheduler()
-		bot.send_chat_action(message.chat.id, 'typing')
+		bot.reply_to(message, "Функції запущені командою")
 	except Exception as e:
 		app.logger.error(f"Помилка для chat_id {message.chat.id}: {e}")
 
