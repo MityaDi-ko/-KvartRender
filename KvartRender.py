@@ -77,14 +77,18 @@ def after_request(response):
 def webhook():
 		read = request.stream.read().decode('utf-8')
 		update = telebot.types.Update.de_json(read)
-		if update.message and update.message.text == "/run":
-			chat_id = update.message.chat.id  # Отримуємо chat_id
-			bot.send_message(chat_id, "запуск командою")
-			start_background_scheduler()
 		#app.logger.info(f"Обробляється chat_id: {update.message.chat.id}")
 		bot.process_new_updates([update])
 		return 'ok', 200
 
+# запуск командою за сценарієм console.cron-job.org/
+@app.route('/run', methods=['GET'])
+def run_command():
+	chat_id = os.getenv("chat_id.DOM")  # Вставте ID чату, у який бот має відправити команду
+	bot.send_message(chat_id, "Запуск командою")
+	start_background_scheduler()
+	return {"status": "ok"}, 200
+	
 @app.route("/", methods=["HEAD", "GET"])
 def home():
 	app.logger.info(f"Запит від: {request.headers.get('User-Agent')}")
