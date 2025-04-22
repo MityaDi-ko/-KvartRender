@@ -77,9 +77,6 @@ def after_request(response):
 def webhook():
 		read = request.stream.read().decode('utf-8')
 		update = telebot.types.Update.de_json(read)
-		if text == "/run":
-			bot.send_message(chat_id, "запуск командою")
-			start_background_scheduler()
 		#app.logger.info(f"Обробляється chat_id: {update.message.chat.id}")
 		bot.process_new_updates([update])
 		return 'ok', 200
@@ -584,7 +581,10 @@ def go_dom(*args):
 
 	
 
-
+@bot.message_handler(commands=['run'])
+def run_command(message):
+	handle_run_command(message.chat.id)
+	start_background_scheduler()
 
 # Обработчик нажатий на кнопки 
 @bot.callback_query_handler(func=lambda call: True) 
